@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FM AI</title>
+
+<!-- Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- Safe HTML -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        Inter,
+        sans-serif;
+    background: #0b0b0d;
+    color: #f5f5f7;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ================= HEADER ================= */
+
+.header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+
+    border-bottom: 1px solid #242426;
+    background: rgba(18,18,20,.92);
+    backdrop-filter: blur(20px);
+
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.apple {
+    font-size: 25px;
+}
+
+.model {
+    color: #8e8e93;
+    font-size: 13px;
+    margin-left: 5px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #8e8e93;
+    font-size: 13px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff453a;
+}
+
+.status-dot.online {
+    background: #30d158;
+}
+
+/* ================= BUTTONS ================= */
+
+button {
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.icon-button {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 9px;
+
+    background: #242426;
+    color: #f5f5f7;
+
+    font-size: 16px;
+
+    transition: .15s;
+}
+
+.icon-button:hover {
+    background: #333336;
+}
+
+/* ================= CHAT ================= */
+
+.chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 20px 180px;
+    scroll-behavior: smooth;
+}
+
+.messages {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* ================= MESSAGE ================= */
+
+.message {
+    display: flex;
+    gap: 14px;
+
+    margin-bottom: 28px;
+
+    animation: fadeIn .2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.avatar {
+    flex: 0 0 34px;
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.user .avatar {
+    background: #3478f6;
+}
+
+.assistant .avatar {
+    background: #333336;
+}
+
+.content {
+    min-width: 0;
+    flex: 1;
+
+    line-height: 1.65;
+    font-size: 15px;
+}
+
+/* ================= MARKDOWN ================= */
+
+.content h1,
+.content h2,
+.content h3 {
+    margin-top: 22px;
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+
+.content h1 {
+    font-size: 25px;
+}
+
+.content h2 {
+    font-size: 21px;
+}
+
+.content h3 {
+    font-size: 18px;
+}
+
+.content p {
+    margin: 8px 0;
+}
+
+.content ul,
+.content ol {
+    padding-left: 25px;
+}
+
+.content li {
+    margin: 5px 0;
+}
+
+.content blockquote {
+    border-left: 3px solid #555;
+    margin: 15px 0;
+    padding: 4px 15px;
+    color: #aaa;
+}
+
+.content a {
+    color: #64a0ff;
+}
+
+.content strong {
+    font-weight: 700;
+}
+
+.content em {
+    color: #d0d0d5;
+}
+
+.content code {
+    background: #242426;
+    border-radius: 5px;
+    padding: 2px 6px;
+
+    font-family:
+        "SFMono-Regular",
+        Menlo,
+        Monaco,
+        monospace;
+
+    font-size: 13px;
+}
+
+.content pre {
+    position: relative;
+
+    margin: 16px 0;
+
+    background: #151517;
+    border: 1px solid #2a2a2d;
+
+    border-radius: 12px;
+
+    overflow-x: auto;
+
+    padding: 16px;
+
+    box-shadow:
+        0 4px 20px rgba(0,0,0,.25);
+}
+
+.content pre code {
+    background: transparent;
+    padding: 0;
+
+    font-size: 13px;
+    line-height: 1.55;
+
+    color: #e6e6e8;
+
+    white-space: pre;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: -16px -16px 12px;
+    padding: 8px 12px;
+
+    background: #1d1d20;
+
+    border-bottom: 1px solid #2b2b2e;
+
+    font-size: 11px;
+    color: #8e8e93;
+}
+
+.copy-code {
+    background: #303034;
+    color: #ddd;
+
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+}
+
+.copy-code:hover {
+    background: #444448;
+}
+
+/* ================= COPY RESPONSE ================= */
+
+.message-actions {
+    margin-top: 7px;
+}
+
+.muted {
+    color: #8e8e93;
+    font-size: 12px;
+}
+
+.copy-response {
+    background: transparent;
+    color: #777;
+
+    font-size: 12px;
+
+    padding: 3px 0;
+}
+
+.copy-response:hover {
+    color: #aaa;
+}
+
+/* ================= WELCOME ================= */
+
+.welcome {
+    min-height: 65vh;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    color: #8e8e93;
+}
+
+.welcome-icon {
+    font-size: 54px;
+    margin-bottom: 15px;
+}
+
+.welcome h1 {
+    color: #f5f5f7;
+    font-size: 30px;
+    margin: 0 0 10px;
+}
+
+.welcome p {
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+.suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: 680px;
+    margin-top: 18px;
+}
+
+.suggestion {
+    padding: 9px 13px;
+    border: 1px solid #343438;
+    border-radius: 999px;
+    background: #1c1c1e;
+    color: #d1d1d6;
+    font-size: 13px;
+    transition: .15s;
+}
+
+.suggestion:hover {
+    background: #2c2c2e;
+    border-color: #55555a;
+    transform: translateY(-1px);
+}
+
+/* ================= INPUT ================= */
+
+.input-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    padding: 15px 20px 20px;
+
+    background:
+        linear-gradient(
+            transparent,
+            #0b0b0d 25%
+        );
+
+    z-index: 5;
+}
+
+.input-container {
+    max-width: 900px;
+    margin: auto;
+
+    background: #1c1c1e;
+
+    border: 1px solid #343438;
+
+    border-radius: 17px;
+
+    display: flex;
+    align-items: flex-end;
+
+    padding: 10px 10px 10px 15px;
+
+    box-shadow:
+        0 8px 40px rgba(0,0,0,.4);
+}
+
+textarea {
+    flex: 1;
+
+    resize: none;
+
+    max-height: 180px;
+
+    min-height: 24px;
+
+    background: transparent;
+
+    border: 0;
+    outline: 0;
+
+    color: #f5f5f7;
+
+    font-family: inherit;
+    font-size: 15px;
+
+    line-height: 1.5;
+
+    padding: 6px 5px;
+}
+
+textarea::placeholder {
+    color: #777;
+}
+
+.send {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 11px;
+
+    background: #f5f5f7;
+    color: #111;
+
+    font-size: 17px;
+
+    transition: .15s;
+}
+
+.send:hover {
+    transform: scale(1.04);
+}
+
+.send:disabled {
+    opacity: .35;
+    cursor: default;
+    transform: none;
+}
+
+.stop {
+    display: none;
+    width: 38px;
+    height: 38px;
+    margin-right: 7px;
+    border-radius: 11px;
+    background: #3a3a3c;
+    color: #f5f5f7;
+    font-size: 15px;
+}
+
+.input-container.generating .stop {
+    display: block;
+}
+
+.scroll-latest {
+    position: fixed;
+    right: 24px;
+    bottom: 112px;
+    z-index: 6;
+    display: none;
+    padding: 9px 13px;
+    border: 1px solid #454549;
+    border-radius: 999px;
+    background: #242426;
+    color: #f5f5f7;
+    box-shadow: 0 5px 20px rgba(0,0,0,.35);
+    font-size: 12px;
+}
+
+.scroll-latest.visible {
+    display: block;
+}
+
+.scroll-latest:hover {
+    background: #333336;
+}
+
+/* ================= THINKING ================= */
+
+.typing {
+    display: inline-flex;
+    gap: 4px;
+    padding: 10px 0;
+}
+
+.typing span {
+    width: 6px;
+    height: 6px;
+
+    background: #777;
+
+    border-radius: 50%;
+
+    animation: blink 1.2s infinite;
+}
+
+.typing span:nth-child(2) {
+    animation-delay: .15s;
+}
+
+.typing span:nth-child(3) {
+    animation-delay: .3s;
+}
+
+@keyframes blink {
+    0%, 60%, 100% {
+        opacity: .25;
+    }
+
+    30% {
+        opacity: 1;
+    }
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width: 600px) {
+
+    .header {
+        padding: 0 15px;
+    }
+
+    .model {
+        display: none;
+    }
+
+    .chat {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .input-area {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header class="header">
+
+    <div class="logo">
+        <span class="apple"></span>
+        <span>FM AI</span>
+        <span class="model">Apple Foundation Model</span>
+    </div>
+
+    <div class="header-right">
+
+        <div class="status">
+            <span id="statusDot" class="status-dot"></span>
+            <span id="statusText">Checking...</span>
+        </div>
+
+        <button
+            class="icon-button"
+            onclick="clearChat()"
+            title="Clear chat">
+            ⌫
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- CHAT -->
+
+<main class="chat" id="chat">
+
+    <div class="messages" id="messages">
+
+        <div class="welcome" id="welcome">
+
+            <div class="welcome-icon"></div>
+
+            <h1>FM AI</h1>
+
+            <p>
+                Local AI powered by Apple's on-device
+                Foundation Model.
+            </p>
+
+            <div class="suggestions" aria-label="Suggested prompts">
+                <button class="suggestion" data-prompt="Explain how Apple Foundation Model works">How does it work?</button>
+                <button class="suggestion" data-prompt="Write a concise plan for my next project">Help me make a plan</button>
+                <button class="suggestion" data-prompt="Summarize the key ideas in this text: ">Summarize text</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<button id="scrollLatest" class="scroll-latest" type="button">↓ Latest</button>
+
+
+<!-- INPUT -->
+
+<div class="input-area">
+
+    <div class="input-container">
+
+        <textarea
+            id="input"
+            rows="1"
+            placeholder="Message FM..."
+            autocomplete="off"
+            spellcheck="true"></textarea>
+
+        <button id="stop" class="stop" type="button" title="Stop generating" aria-label="Stop generating">■</button>
+
+        <button
+            id="send"
+            class="send"
+            title="Send">
+            ↑
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API = "http://127.0.0.1:11434/v1/chat/completions";
+
+const MODEL = "apple-foundationmodel";
+
+const messagesElement =
+    document.getElementById("messages");
+
+const input =
+    document.getElementById("input");
+
+const sendButton =
+    document.getElementById("send");
+
+const stopButton =
+    document.getElementById("stop");
+
+const inputContainer =
+    document.querySelector(".input-container");
+
+const scrollLatestButton =
+    document.getElementById("scrollLatest");
+
+const statusDot =
+    document.getElementById("statusDot");
+
+const statusText =
+    document.getElementById("statusText");
+
+let history = [];
+
+let generating = false;
+let shouldAutoScroll = true;
+let activeController = null;
+
+
+/* ================= MARKDOWN ================= */
+
+marked.setOptions({
+    breaks: true,
+    gfm: true
+});
+
+
+function renderMarkdown(text) {
+
+    const html = marked.parse(text || "");
+
+    return DOMPurify.sanitize(html);
+
+}
+
+
+/* ================= STATUS ================= */
+
+async function checkStatus() {
+
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:11434/health"
+        );
+
+        if (response.ok) {
+
+            statusDot.classList.add("online");
+            statusText.textContent = "Online";
+
+        } else {
+
+            throw new Error();
+
+        }
+
+    } catch {
+
+        statusDot.classList.remove("online");
+        statusText.textContent = "Offline";
+
+    }
+
+}
+
+
+checkStatus();
+
+setInterval(checkStatus, 5000);
+
+
+/* ================= ADD MESSAGE ================= */
+
+function addMessage(role, text = "") {
+
+    const welcome =
+        document.getElementById("welcome");
+
+    if (welcome) {
+        welcome.remove();
+    }
+
+    const message =
+        document.createElement("div");
+
+    message.className =
+        `message ${role}`;
+
+    const avatar =
+        document.createElement("div");
+
+    avatar.className = "avatar";
+
+    avatar.textContent =
+        role === "user" ? "You" : "";
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className = "content";
+
+    wrapper.innerHTML =
+        renderMarkdown(text);
+
+    message.appendChild(avatar);
+    message.appendChild(wrapper);
+
+    messagesElement.appendChild(message);
+
+    scrollToBottom(true);
+
+    return {
+        message,
+        wrapper
+    };
+
+}
+
+
+/* ================= CODE COPY ================= */
+
+function setupCodeCopy(wrapper) {
+
+    wrapper
+        .querySelectorAll("pre")
+        .forEach(pre => {
+
+            const code =
+                pre.querySelector("code");
+
+            if (!code) return;
+
+            const language =
+                code.className
+                    .replace("language-", "")
+                    || "code";
+
+            const header =
+                document.createElement("div");
+
+            header.className =
+                "code-header";
+
+            const label =
+                document.createElement("span");
+
+            label.textContent =
+                language;
+
+            const button =
+                document.createElement("button");
+
+            button.className =
+                "copy-code";
+
+            button.textContent =
+                "Copy";
+
+            button.onclick = async () => {
+
+                await navigator.clipboard.writeText(
+                    code.innerText
+                );
+
+                button.textContent =
+                    "Copied ✓";
+
+                setTimeout(() => {
+                    button.textContent = "Copy";
+                }, 1500);
+
+            };
+
+            header.appendChild(label);
+            header.appendChild(button);
+
+            pre.insertBefore(
+                header,
+                pre.firstChild
+            );
+
+        });
+
+}
+
+
+/* ================= FINALIZE MESSAGE ================= */
+
+function finalizeAssistant(wrapper, text) {
+
+    wrapper.innerHTML =
+        renderMarkdown(text);
+
+    setupCodeCopy(wrapper);
+
+}
+
+
+/* ================= COPY WHOLE RESPONSE ================= */
+
+function addCopyButton(message, text) {
+
+    const actions =
+        document.createElement("div");
+
+    actions.className =
+        "message-actions";
+
+    const button =
+        document.createElement("button");
+
+    button.className =
+        "copy-response";
+
+    button.textContent =
+        "Copy response";
+
+    button.onclick = async () => {
+
+        await navigator.clipboard.writeText(text);
+
+        button.textContent =
+            "Copied ✓";
+
+        setTimeout(() => {
+
+            button.textContent =
+                "Copy response";
+
+        }, 1500);
+
+    };
+
+    actions.appendChild(button);
+
+    message
+        .querySelector(".content")
+        .appendChild(actions);
+
+}
+
+
+/* ================= SEND ================= */
+
+async function sendMessage() {
+
+    if (generating) return;
+
+    const text =
+        input.value.trim();
+
+    if (!text) return;
+
+    generating = true;
+
+    activeController = new AbortController();
+    inputContainer.classList.add("generating");
+
+    sendButton.disabled = true;
+
+    input.value = "";
+
+    autoResize();
+
+    addMessage("user", text);
+
+    history.push({
+        role: "user",
+        content: text
+    });
+
+
+    /* Assistant */
+
+    const assistant =
+        addMessage("assistant", "");
+
+    const wrapper =
+        assistant.wrapper;
+
+    wrapper.innerHTML = `
+        <div class="typing">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    `;
+
+
+    try {
+
+        const response =
+            await fetch(API, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                signal: activeController.signal,
+
+                body: JSON.stringify({
+
+                    model: MODEL,
+
+                    messages: history,
+
+                    stream: true,
+
+                    temperature: 0.7
+
+                })
+
+            });
+
+
+        if (!response.ok) {
+
+            const error =
+                await response.text();
+
+            throw new Error(
+                `HTTP ${response.status}: ${error}`
+            );
+
+        }
+
+
+        const reader =
+            response.body.getReader();
+
+        const decoder =
+            new TextDecoder();
+
+        let buffer = "";
+
+        let fullText = "";
+
+        while (true) {
+
+            const {
+                done,
+                value
+            } =
+                await reader.read();
+
+            if (done) break;
+
+            buffer +=
+                decoder.decode(
+                    value,
+                    {stream: true}
+                );
+
+            const lines =
+                buffer.split("\n");
+
+            buffer =
+                lines.pop() || "";
+
+            for (const line of lines) {
+
+                const trimmed =
+                    line.trim();
+
+                if (!trimmed)
+                    continue;
+
+                if (!trimmed.startsWith("data:"))
+                    continue;
+
+                const data =
+                    trimmed.substring(5).trim();
+
+                if (data === "[DONE]")
+                    continue;
+
+                try {
+
+                    const json =
+                        JSON.parse(data);
+
+                    const delta =
+                        json.choices?.[0]
+                            ?.delta
+                            ?.content;
+
+                    if (delta) {
+
+                        fullText += delta;
+
+                        wrapper.innerHTML =
+                            renderMarkdown(fullText);
+
+                        setupCodeCopy(wrapper);
+
+                        scrollToBottom();
+
+                    }
+
+                } catch {
+
+                    /* Ignore malformed SSE chunks */
+
+                }
+
+            }
+
+        }
+
+
+        if (!fullText) {
+
+            wrapper.textContent =
+                "No response received.";
+
+        }
+
+
+        history.push({
+
+            role: "assistant",
+
+            content: fullText
+
+        });
+
+
+        addCopyButton(
+            assistant.message,
+            fullText
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        if (error.name === "AbortError") {
+            wrapper.insertAdjacentHTML(
+                "beforeend",
+                '<p class="muted">Generation stopped.</p>'
+            );
+            return;
+        }
+
+        wrapper.innerHTML = `
+            <strong>Error</strong>
+            <p>${escapeHtml(error.message)}</p>
+        `;
+
+    } finally {
+
+        generating = false;
+        activeController = null;
+        inputContainer.classList.remove("generating");
+
+        sendButton.disabled = false;
+
+        input.focus();
+
+        scrollToBottom();
+
+    }
+
+}
+
+
+/* ================= ESCAPE ================= */
+
+function escapeHtml(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+
+}
+
+
+/* ================= CLEAR ================= */
+
+function clearChat() {
+
+    if (generating) return;
+
+    history = [];
+
+    messagesElement.innerHTML = `
+
+        <div class="welcome" id="welcome">
+
+            <div class="welcome-icon"></div>
+
+            <h1>FM AI</h1>
+
+            <p>
+                Local AI powered by Apple's on-device
+                Foundation Model.
+            </p>
+
+            <div class="suggestions" aria-label="Suggested prompts">
+                <button class="suggestion" data-prompt="Explain how Apple Foundation Model works">How does it work?</button>
+                <button class="suggestion" data-prompt="Write a concise plan for my next project">Help me make a plan</button>
+                <button class="suggestion" data-prompt="Summarize the key ideas in this text: ">Summarize text</button>
+            </div>
+
+        </div>
+
+    `;
+
+    shouldAutoScroll = true;
+    scrollToBottom(true);
+
+}
+
+
+/* ================= SCROLL ================= */
+
+function isNearBottom() {
+
+    const chat = document.getElementById("chat");
+
+    return chat.scrollHeight - chat.scrollTop - chat.clientHeight < 80;
+
+}
+
+
+function updateScrollButton() {
+
+    scrollLatestButton.classList.toggle("visible", !isNearBottom());
+
+}
+
+
+function scrollToBottom(force = false) {
+
+    const chat = document.getElementById("chat");
+
+    if (!force && !shouldAutoScroll) {
+        updateScrollButton();
+        return;
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+    shouldAutoScroll = true;
+    updateScrollButton();
+
+}
+
+
+document.getElementById("chat").addEventListener("scroll", () => {
+
+    shouldAutoScroll = isNearBottom();
+    updateScrollButton();
+
+});
+
+
+scrollLatestButton.addEventListener("click", () => {
+
+    shouldAutoScroll = true;
+    scrollToBottom(true);
+
+});
+
+
+stopButton.addEventListener("click", () => {
+
+    if (activeController) activeController.abort();
+
+});
+
+
+/* ================= TEXTAREA ================= */
+
+function autoResize() {
+
+    input.style.height = "auto";
+
+    input.style.height =
+        Math.min(
+            input.scrollHeight,
+            180
+        ) + "px";
+
+}
+
+
+input.addEventListener(
+    "input",
+    autoResize
+);
+
+
+/* ================= ENTER ================= */
+
+input.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+/* ================= SEND BUTTON ================= */
+
+sendButton.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+messagesElement.addEventListener("click", event => {
+
+    const suggestion = event.target.closest(".suggestion");
+
+    if (!suggestion) return;
+
+    input.value = suggestion.dataset.prompt;
+    autoResize();
+    input.focus();
+
+});
+
+
+input.focus();
+
+</script>
+
+</body>
+</html>
